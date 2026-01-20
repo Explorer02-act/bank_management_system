@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mediline Student Manager</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <link href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-green: #00c292;
+            --dark-green: #0e9f6e;
+            --sidebar-bg: linear-gradient(180deg, #00c292 0%, #009688 100%);
+            --bg-color: #f4f7f6;
+            --text-muted: #8898aa;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            overflow-x: hidden;
+        }
+
+        /* SIDEBAR DESIGN */
+        .sidebar {
+            width: 250px;
+            background: var(--sidebar-bg);
+            min-height: 100vh;
+            color: white;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 20px;
+            z-index: 100;
+        }
+        
+        .sidebar-brand {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-item {
+            padding: 12px 15px;
+            margin-bottom: 5px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            opacity: 0.8;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255, 255, 255, 0.2);
+            opacity: 1;
+        }
+
+        .nav-item i { width: 20px; text-align: center; }
+
+        /* MAIN CONTENT */
+        .main-content {
+            margin-left: 250px;
+            padding: 30px;
+        }
+
+        /* CUSTOM CARDS */
+        .custom-card {
+            background: white;
+            border-radius: 20px;
+            border: none;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .card-header-custom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+
+        /* FORM STYLING */
+        .form-control, .form-select {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 10px 15px;
+        }
+        
+        .form-control:focus {
+            box-shadow: none;
+            border-color: var(--primary-green);
+        }
+
+        .btn-mediline {
+            background-color: var(--primary-green);
+            color: white;
+            border-radius: 10px;
+            padding: 10px 20px;
+            border: none;
+            font-weight: 500;
+            width: 100%;
+            transition: 0.3s;
+        }
+
+        .btn-mediline:hover {
+            background-color: var(--dark-green);
+            color: white;
+        }
+
+        /* TABLE STYLING */
+        /* Minor override for DataTables pagination buttons */
+        .page-link { color: var(--primary-green); }
+        .page-item.active .page-link { background-color: var(--primary-green); border-color: var(--primary-green); }
+
+        .minor-row {
+            background-color: #fff9e6 !important; 
+        }
+        
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        .btn-edit { background: #e0f2fe; color: #0284c7; }
+        .btn-edit:hover { background: #0284c7; color: white; }
+        .btn-delete { background: #fee2e2; color: #dc2626; }
+        .btn-delete:hover { background: #dc2626; color: white; }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 70px; padding: 20px 10px; }
+            .sidebar-brand span, .nav-item span { display: none; }
+            .main-content { margin-left: 70px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-brand"><span>STUDENT MANAGEMENT</span>
+        </div>
+        <div class="nav-item active">
+            <i class="fas fa-user-graduate"></i> <span>Students</span>
+        </div>
+    </div>
+
+    <div class="main-content">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold mb-0">Student Management</h4>
+                <small class="text-muted">Manage records, add students, and view details.</small>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <img src="https://ui-avatars.com/api/?name=Admin+User&background=00c292&color=fff" class="rounded-circle" width="40" alt="Profile">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="custom-card">
+                    <div class="card-header-custom">
+                        <h5 class="card-title" id="formTitle">Add New Student</h5>
+                        <i class="fas fa-user-plus text-success bg-light p-2 rounded-circle"></i>
+                    </div>
+
+                    <form id="studentForm">
+                        <input type="hidden" id="studentId">
+                        
+                        <div class="mb-3">
+                            <label class="small text-muted mb-1">Full Name</label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <input type="text" class="form-control" id="firstName" placeholder="First" required>
+                                </div>
+                                <div class="col-6">
+                                    <input type="text" class="form-control" id="lastName" placeholder="Last" required>
+                                </div>
+                                <div class="col-12">
+                                    <input type="text" class="form-control mt-2" id="middleName" placeholder="Middle (Optional)">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="small text-muted mb-1">Birthdate</label>
+                            <input type="date" class="form-control" id="birthdate" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="small text-muted mb-1">Academic Details</label>
+                            <select class="form-select mb-2" id="course" required>
+                                <option value="" disabled selected>Select Course</option>
+                                <option value="BSCS">BS Computer Science</option>
+                                <option value="BSIT">BS Information Technology</option>
+                                <option value="BSIS">BS Information Systems</option>
+                            </select>
+                            
+                            <select class="form-select" id="yearLevel" required>
+                                <option value="" disabled selected>Select Year</option>
+                                <option value="1">1st Year</option>
+                                <option value="2">2nd Year</option>
+                                <option value="3">3rd Year</option>
+                                <option value="4">4th Year</option>
+                            </select>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn-mediline" id="submitBtn">
+                                Add Student
+                            </button>
+                            <button type="button" class="btn btn-secondary w-100 mt-2 d-none" id="cancelBtn" onclick="resetForm()" style="border-radius:10px;">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="custom-card h-100">
+                    <div class="card-header-custom">
+                        <h5 class="card-title">Enrolled Students</h5>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table id="studentTable" class="table table-hover table-custom align-middle" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Student Name</th>
+                                    <th>Age</th>
+                                    <th>Course</th>
+                                    <th>Year</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentTableBody">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+        let students = [];
+        let isEditing = false;
+        let dataTable; // Variable to store DataTable instance
+
+        // DOM Elements
+        const form = document.getElementById('studentForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const formTitle = document.getElementById('formTitle');
+
+        // Initialize DataTable on load
+        $(document).ready(function() {
+            dataTable = $('#studentTable').DataTable({
+                "pageLength": 5, // Show 5 rows by default to fit design
+                "lengthMenu": [5, 10, 25, 50],
+                "language": {
+                    "emptyTable": "No students added yet."
+                }
+            });
+        });
+
+        // --- Helper Functions ---
+        function calculateAge(dateString) {
+            const today = new Date();
+            const birthDate = new Date(dateString);
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const m = today.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) { age--; }
+            return age;
+        }
+
+        // --- Core Functions ---
+        function renderTable() {
+            // 1. Destroy existing DataTable instance before updating DOM
+            if ($.fn.DataTable.isDataTable('#studentTable')) {
+                $('#studentTable').DataTable().destroy();
+            }
+
+            // 2. Clear Table Body
+            const tableBody = document.getElementById('studentTableBody');
+            tableBody.innerHTML = "";
+            
+            // 3. Populate Rows
+            students.forEach((student, index) => {
+                const age = calculateAge(student.birthdate);
+                const isMinor = age < 18;
+                const rowClass = isMinor ? "minor-row" : "";
+                
+                const fullName = `
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <div class="fw-bold text-dark">${student.lastName}, ${student.firstName}</div>
+                            <div class="small text-muted" style="font-size: 11px;">${student.middleName || ''}</div>
+                        </div>
+                    </div>
+                `;
+
+                const ageBadge = isMinor 
+                    ? `<span class="badge bg-warning text-dark rounded-pill">${age} (Minor)</span>` 
+                    : `<span class="badge bg-light text-dark rounded-pill border">${age}</span>`;
+
+                const row = `
+                    <tr class="${rowClass}">
+                        <td class="text-muted small">${index + 1}</td>
+                        <td>${fullName}</td>
+                        <td>${ageBadge}</td>
+                        <td><span class="badge bg-success bg-opacity-10 text-success">${student.course}</span></td>
+                        <td class="fw-bold text-secondary">${student.yearLevel}</td>
+                        <td class="text-end">
+                            <button class="action-btn btn-edit" onclick="editStudent(${student.id})" title="Edit">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                            <button class="action-btn btn-delete" onclick="deleteStudent(${student.id})" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+
+            // 4. Re-initialize DataTable
+            dataTable = $('#studentTable').DataTable({
+                 "pageLength": 5,
+                 "lengthMenu": [5, 10, 25, 50]
+            });
+        }
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const id = document.getElementById('studentId').value;
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const middleName = document.getElementById('middleName').value.trim();
+            const birthdate = document.getElementById('birthdate').value;
+            const course = document.getElementById('course').value;
+            const yearLevel = document.getElementById('yearLevel').value;
+
+            const studentObj = {
+                id: isEditing ? parseInt(id) : Date.now(),
+                firstName, lastName, middleName, birthdate, course, yearLevel
+            };
+
+            if (isEditing) {
+                const index = students.findIndex(s => s.id === parseInt(id));
+                if (index !== -1) students[index] = studentObj;
+            } else {
+                students.push(studentObj);
+            }
+
+            resetForm();
+            renderTable();
+        });
+
+        window.editStudent = function(id) {
+            const student = students.find(s => s.id === id);
+            if (student) {
+                document.getElementById('studentId').value = student.id;
+                document.getElementById('firstName').value = student.firstName;
+                document.getElementById('lastName').value = student.lastName;
+                document.getElementById('middleName').value = student.middleName;
+                document.getElementById('birthdate').value = student.birthdate;
+                document.getElementById('course').value = student.course;
+                document.getElementById('yearLevel').value = student.yearLevel;
+
+                isEditing = true;
+                formTitle.innerText = "Edit Student";
+                submitBtn.innerText = "Update Changes";
+                submitBtn.style.backgroundColor = "#f59e0b"; // Warning Orange
+                cancelBtn.classList.remove("d-none");
+            }
+        };
+
+        window.deleteStudent = function(id) {
+            if (confirm("Remove this student permanently?")) {
+                students = students.filter(s => s.id !== id);
+                if(isEditing && parseInt(document.getElementById('studentId').value) === id) resetForm();
+                renderTable();
+            }
+        };
+
+        window.resetForm = function() {
+            form.reset();
+            isEditing = false;
+            document.getElementById('studentId').value = "";
+            formTitle.innerText = "Add New Student";
+            submitBtn.innerText = "Add Student";
+            submitBtn.style.backgroundColor = "var(--primary-green)";
+            cancelBtn.classList.add("d-none");
+        };
+    </script>
+</body>
+</html>
